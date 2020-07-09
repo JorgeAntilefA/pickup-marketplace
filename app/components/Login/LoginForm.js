@@ -16,9 +16,7 @@ import {
 import { Input, Icon } from "@ui-kitten/components";
 import axios from "axios";
 import Loading from "../Loading";
-import * as Permissions from "expo-permissions";
 import Constants from "./../../utils/Constants";
-import * as Location from "expo-location";
 
 export default function LoginForm(props) {
   const { toastRef, navigation } = props;
@@ -27,8 +25,8 @@ export default function LoginForm(props) {
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
-  const { url } = Constants;
-  const [selectedValue, setSelectedValue] = useState("java");
+  const { urlMysql, urlLogin } = Constants;
+  const [selectedValue, setSelectedValue] = useState("0");
 
   useEffect(() => {
     const getRememberedUser = async () => {
@@ -80,6 +78,7 @@ export default function LoginForm(props) {
   };
 
   const login = async () => {
+    console.log(selectedValue);
     if (selectedValue === "0") {
       toastRef.current.show("Debes seleccionar TIPO USUARIO");
     } else {
@@ -93,37 +92,56 @@ export default function LoginForm(props) {
       if (!username || !password) {
         toastRef.current.show("Hay campos vacios");
       } else {
-        await axios
-          .post(url, params)
-          .then((response) => {
-            //console.log(response);
-            if (Platform.OS === "ios") {
-              if (response.data.id == "null") {
+        if (selectedValue === "1") {
+          await axios
+            .post(urlMysql, params)
+            .then((response) => {
+              //console.log(response);
+              if (Platform.OS === "ios") {
+                if (response.data.id == "null") {
+                  toastRef.current.show("Credenciales inválidas");
+                } else {
+                  rememberUser();
+                  navigation.navigate("options", {
+                    usuario: response.data.id,
+                    nombre: response.data.nombre,
+                  });
+                }
+              } else {
+                if (response.data.id == "null") {
+                  toastRef.current.show("Credenciales inválidas");
+                } else {
+                  rememberUser();
+                  navigation.navigate("options", {
+                    usuario: response.data.id,
+                    nombre: response.data.nombre,
+                  });
+                }
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        } else {
+          await axios
+            .post(urlLogin, { name: username, password: password })
+            .then((response) => {
+              console.log(response.data);
+              if (response.data.name == "null") {
                 toastRef.current.show("Credenciales inválidas");
               } else {
                 rememberUser();
-                navigation.navigate("options", {
-                  usuario: response.data.id,
-                  nombre: response.data.nombre,
+                navigation.navigate("operator", {
+                  usuario: response.data.name,
                 });
               }
-            } else {
-              if (response.data.id == "null") {
-                toastRef.current.show("Credenciales inválidas");
-              } else {
-                rememberUser();
-                navigation.navigate("options", {
-                  usuario: response.data.id,
-                  nombre: response.data.nombre,
-                });
-              }
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+        setIsvisibleLoading(false);
       }
-      setIsvisibleLoading(false);
     }
   };
 

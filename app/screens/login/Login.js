@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import LoginForm from "../../components/Login/LoginForm";
+import LoginForm from "../../components/login/LoginForm";
 import Toast from "react-native-easy-toast";
 import { useNavigation } from "@react-navigation/native";
 

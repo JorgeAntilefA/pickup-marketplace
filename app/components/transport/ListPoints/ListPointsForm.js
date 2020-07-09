@@ -10,8 +10,8 @@ import {
   RefreshControl,
 } from "react-native";
 import axios from "axios";
-import Constants from "../../utils/Constants";
-import Loading from "../Loading";
+import Constants from "../../../utils/Constants";
+import Loading from "../../Loading";
 import { useIsFocused } from "@react-navigation/native";
 
 export default function ListPointsForm(props) {
@@ -20,7 +20,7 @@ export default function ListPointsForm(props) {
   const isFocused = useIsFocused();
   const [data, setData] = useState();
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
-  const { url } = Constants;
+  const { urlMysql } = Constants;
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -41,7 +41,7 @@ export default function ListPointsForm(props) {
     params.append("id_usuario", usuario);
 
     await axios
-      .post(url, params)
+      .post(urlMysql, params)
       .then((response) => {
         setData(response.data);
         console.log(response.data);

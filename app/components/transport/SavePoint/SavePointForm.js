@@ -9,11 +9,10 @@ import {
   StatusBar,
   Picker,
   Alert,
-  BackHandler,
 } from "react-native";
 import axios from "axios";
-import Loading from "../Loading";
-import Constants from "../../utils/Constants";
+import Loading from "../../Loading";
+import Constants from "../../../utils/Constants";
 import Toast from "react-native-easy-toast";
 import { Input } from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
@@ -24,7 +23,7 @@ export default function SavePointForm(props) {
   const { navigation, route } = props;
   const { usuario, seller, Id_Seller, id_usuario } = route.params;
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
-  const { url } = Constants;
+  const { urlMysql } = Constants;
   const toastRef = useRef();
 
   const [selectedValueState, setSelectedValueState] = useState("cero");
@@ -32,7 +31,6 @@ export default function SavePointForm(props) {
 
   const [bultos, setBultos] = useState("");
   const [comentario, setComentario] = useState();
-  const [errorMsg, setErrorMsg] = useState(null);
   const [location, setLocation] = useState(null);
 
   useEffect(() => {
@@ -49,7 +47,7 @@ export default function SavePointForm(props) {
     params.append("Opcion", "getEstadosPickup");
 
     await axios
-      .post(url, params)
+      .post(urlMysql, params)
       .then((response) => {
         Platform.OS === "ios"
           ? setSelectedValueS(response.data)
@@ -245,7 +243,7 @@ export default function SavePointForm(props) {
         params.append("longitud_inicial", location.longitude);
 
         await axios
-          .post(url, params)
+          .post(urlMysql, params)
           .then((response) => {
             console.log(response.data);
             navigation.goBack();

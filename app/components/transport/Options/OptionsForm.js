@@ -6,10 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { Icon, ListItem } from "react-native-elements";
 import axios from "axios";
-import Constants from "../../utils/Constants";
-import Loading from "../Loading";
+import Constants from "../../../utils/Constants";
+import Loading from "../../Loading";
 import Toast from "react-native-easy-toast";
 import { useIsFocused } from "@react-navigation/native";
 
@@ -17,7 +16,7 @@ export default function OptionsForm(props) {
   const { navigation, route } = props;
   const { usuario, nombre } = route.params;
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
-  const { url } = Constants;
+  const { urlMysql } = Constants;
   const [pendientes, setPendientes] = useState();
   const [finalizados, setFinalizados] = useState();
   const isFocused = useIsFocused();
@@ -32,7 +31,7 @@ export default function OptionsForm(props) {
       params.append("id_usuario", usuario);
 
       await axios
-        .post(url, params)
+        .post(urlMysql, params)
         .then((response) => {
           if (Platform.OS === "ios") {
             console.log(response);
