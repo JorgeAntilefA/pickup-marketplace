@@ -1,5 +1,5 @@
 import React from "react";
-import ListPointsForm from "../../components/ListPoints/ListPointsForm";
+import ListPointsForm from "../components/ListPoints/ListPointsForm";
 
 export default function ListPoints(props) {
   const { navigation, route } = props;
