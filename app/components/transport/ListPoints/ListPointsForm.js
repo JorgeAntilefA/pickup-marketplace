@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  BackHandler,
   RefreshControl,
 } from "react-native";
 import axios from "axios";
