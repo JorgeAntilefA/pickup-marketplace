@@ -1,35 +1,58 @@
 import React, { useState } from "react";
-import { View, Text, SafeAreaView, StyleSheet } from "react-native";
+import { View, Text, SafeAreaView, StyleSheet, Alert } from "react-native";
 import { Input, Button } from "react-native-elements";
 import axios from "axios";
 import Constants from "../../../utils/Constants";
 
-export default function OperatorForm({}) {
+export default function OperatorForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
+  const { user, id_user } = route.params;
+  // console.log(route.params);
   const { urlOrdersManifests } = Constants;
 
   const handlerButton = async () => {
-    console.log(manifest);
     await axios
-      .post(urlOrdersManifests, { code: "MFJB/CL100H6/20200601071315121" })
+      .post(urlOrdersManifests, { code: manifest })
       .then((response) => {
-        console.log(response.data);
-        // if (response.data.name == "null") {
-        //   toastRef.current.show("Credenciales inválidas");
-        // } else {
-        //   rememberUser();
-        //   navigation.navigate("operator", {
-        //     usuario: response.data.name,
-        //   });
-        // }
+        console.log(response.data.inBd);
+        if (response.data.data.length === 0) {
+          alertManifest();
+        } else {
+          setManifest("");
+          navigation.navigate("package", {
+            data: response.data.data,
+            count: response.data.data.length,
+            inBd: response.data.inBd,
+            code: manifest,
+            user: user,
+            id_user: id_user,
+          });
+        }
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
+  const alertManifest = () =>
+    Alert.alert(
+      "Alerta",
+      "Manifiesto no existe",
+      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+      { cancelable: false }
+    );
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <View
+        style={{
+          height: 20,
+          backgroundColor: "#FACC2E",
+          alignItems: "center",
+        }}
+      >
+        <Text>{user}</Text>
+      </View>
       <View style={styles.container}>
         <View>
           <Text style={styles.title}>Ingrese Manifiesto</Text>
@@ -38,10 +61,15 @@ export default function OperatorForm({}) {
           <Input
             inputContainerStyle={styles.SectionStyle}
             placeholder=" ID Manifiesto"
+            value={manifest}
             onChange={(e) => setManifest(e.nativeEvent.text)}
           />
-          <Button title="OK" onPress={() => handlerButton()} />
         </View>
+        <Button
+          title="OK"
+          containerStyle={{ width: "80%" }}
+          onPress={() => handlerButton()}
+        />
       </View>
     </SafeAreaView>
   );
@@ -60,7 +88,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     marginTop: 10,
     height: 40,
-    width: "90%",
+    width: "100%",
     borderRadius: 5,
   },
   title: {

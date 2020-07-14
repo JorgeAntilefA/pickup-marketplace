@@ -7,6 +7,7 @@ import OptionsScreen from "../screens/transport/Options";
 import ListPoints from "../screens/transport/ListPoints";
 import SavePoint from "../screens/transport/SavePoint";
 import Operator from "../screens/operation/operator/Operator";
+import PackageId from "../screens/operation/operator/PackageId";
 
 const Tab = createBottomTabNavigator();
 
@@ -37,6 +38,11 @@ export default function Navigation() {
         <Tab.Screen
           name="operator"
           component={Operator}
+          options={{ title: "salir", tabBarVisible: false }}
+        />
+        <Tab.Screen
+          name="package"
+          component={PackageId}
           options={{ title: "salir", tabBarVisible: false }}
         />
       </Tab.Navigator>

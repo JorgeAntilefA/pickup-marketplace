@@ -78,7 +78,6 @@ export default function LoginForm(props) {
   };
 
   const login = async () => {
-    console.log(selectedValue);
     if (selectedValue === "0") {
       toastRef.current.show("Debes seleccionar TIPO USUARIO");
     } else {
@@ -113,8 +112,8 @@ export default function LoginForm(props) {
                 } else {
                   rememberUser();
                   navigation.navigate("options", {
-                    usuario: response.data.id,
-                    nombre: response.data.nombre,
+                    usuario: response.data.name,
+                    // nombre: response.data.name,
                   });
                 }
               }
@@ -127,12 +126,13 @@ export default function LoginForm(props) {
             .post(urlLogin, { name: username, password: password })
             .then((response) => {
               console.log(response.data);
-              if (response.data.name == "null") {
+              if (response.data.length === 0) {
                 toastRef.current.show("Credenciales inválidas");
               } else {
                 rememberUser();
                 navigation.navigate("operator", {
-                  usuario: response.data.name,
+                  id_user: response.data[0].id_user,
+                  user: response.data[0].name,
                 });
               }
             })
@@ -205,8 +205,6 @@ export default function LoginForm(props) {
     </SafeAreaView>
   );
 }
-
-// export default withNavigation(LoginForm);
 
 const styles = StyleSheet.create({
   container: {
