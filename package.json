@@ -16,6 +16,7 @@
     "@ui-kitten/eva-icons": "^5.0.0",
     "axios": "^0.19.2",
     "expo": "~37.0.3",
+    "expo-av": "~8.1.0",
     "expo-location": "~8.1.0",
     "expo-permissions": "~8.1.0",
     "react": "~16.9.0",

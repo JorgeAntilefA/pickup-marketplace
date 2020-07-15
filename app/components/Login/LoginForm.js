@@ -23,10 +23,11 @@ export default function LoginForm(props) {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [typeUser, setTypeUser] = useState(0);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
   const { urlMysql, urlLogin } = Constants;
-  const [selectedValue, setSelectedValue] = useState("0");
+  const [selectedValue, setSelectedValue] = useState("Proveedor");
 
   useEffect(() => {
     const getRememberedUser = async () => {
@@ -38,6 +39,7 @@ export default function LoginForm(props) {
           //console.log(credentialsUser);
           setUsername(JSON.parse(credentialsUser).username);
           setPassword(JSON.parse(credentialsUser).password);
+          setSelectedValue(JSON.parse(credentialsUser).type_user);
           // return username;
         }
       } catch (error) {
@@ -66,7 +68,13 @@ export default function LoginForm(props) {
 
   rememberUser = async () => {
     try {
-      let credentials = { username: username, password: password };
+      let credentials = {
+        username: username,
+        password: password,
+        type_user: selectedValue,
+      };
+
+      console.log(credentials);
       await AsyncStorage.setItem(
         "@localStorage:credentials",
         JSON.stringify(credentials)
@@ -78,7 +86,7 @@ export default function LoginForm(props) {
   };
 
   const login = async () => {
-    if (selectedValue === "0") {
+    if (selectedValue === "Tipo Usuario...") {
       toastRef.current.show("Debes seleccionar TIPO USUARIO");
     } else {
       setIsvisibleLoading(true);
@@ -91,7 +99,7 @@ export default function LoginForm(props) {
       if (!username || !password) {
         toastRef.current.show("Hay campos vacios");
       } else {
-        if (selectedValue === "1") {
+        if (selectedValue === "Proveedor") {
           await axios
             .post(urlMysql, params)
             .then((response) => {
@@ -125,7 +133,6 @@ export default function LoginForm(props) {
           await axios
             .post(urlLogin, { name: username, password: password })
             .then((response) => {
-              console.log(response.data);
               if (response.data.length === 0) {
                 toastRef.current.show("Credenciales inválidas");
               } else {
@@ -153,9 +160,9 @@ export default function LoginForm(props) {
           style={styles.picker}
           onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
         >
-          <Picker.Item label="Tipo Usuario..." value="0" />
-          <Picker.Item label="Proveedor" value="1" />
-          <Picker.Item label="Operario" value="2" />
+          <Picker.Item label="Tipo Usuario..." value="Tipo Usuario..." />
+          <Picker.Item label="Proveedor" value="Proveedor" />
+          <Picker.Item label="Operario" value="Operario" />
         </Picker>
       </View>
     );

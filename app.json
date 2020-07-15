@@ -19,7 +19,8 @@
         "WRITE_EXTERNAL_STORAGE",
         "LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "AUDIO_RECORDING"
       ],
       "package": "com.dafiti.pickup",
       "versionCode": 1

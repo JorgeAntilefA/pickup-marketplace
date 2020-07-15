@@ -11,6 +11,7 @@ import {
 import { Input, Button } from "react-native-elements";
 import axios from "axios";
 import Constants from "../../../utils/Constants";
+import { Audio } from "expo-av";
 
 export default function PackageIdForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
@@ -66,13 +67,15 @@ export default function PackageIdForm({ navigation, route }) {
       console.log("no encontrado");
       alertNotExist();
     } else {
+      let type_ = JSON.parse(JSON.stringify(man)).type;
       const pack = arrayPackage.includes(text);
       const pack2 = JSON.stringify(inBd).includes(text);
       if (!pack && !pack2) {
         setArrayPackage((oldArray) => [...oldArray, text]);
-        console.log(arrayPackage);
+        // console.log(arrayPackage);
         handlerInsert(text);
         setCountCurrent(countCurrent + 1);
+        type_ === "Mixed" ? soundMixta() : soundPura();
       } else {
         alertExist();
       }
@@ -96,6 +99,31 @@ export default function PackageIdForm({ navigation, route }) {
       [{ text: "OK", onPress: () => console.log("OK Pressed") }],
       { cancelable: false }
     );
+
+  async function soundMixta() {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(
+        require("../../../../assets/sound/translate_tts_mixta.mp3")
+      );
+      await soundObject.playAsync();
+      // Your sound is playing!
+    } catch (error) {
+      // An error occurred!
+    }
+  }
+  async function soundPura() {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(
+        require("../../../../assets/sound/translate_tts_pura.mp3")
+      );
+      await soundObject.playAsync();
+      // Your sound is playing!
+    } catch (error) {
+      // An error occurred!
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -128,6 +156,7 @@ export default function PackageIdForm({ navigation, route }) {
           <Box />
           <View style={{ width: "80%", marginTop: 30 }}>
             <Button title="OK" onPress={() => handlerFinish()} />
+            {/* <Button title="OK" onPress={() => sound()} /> */}
           </View>
         </View>
       </ScrollView>

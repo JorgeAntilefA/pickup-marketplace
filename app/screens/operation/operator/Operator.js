@@ -1,5 +1,5 @@
 import React from "react";
-import OperatorForm from "../../../components/operation/operator/OperatorForm";
+import OperatorForm from "../../../components/operation/operator/operatorForm";
 
 export default function Operator(props) {
   const { navigation, route } = props;
