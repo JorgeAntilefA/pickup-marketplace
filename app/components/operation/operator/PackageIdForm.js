@@ -15,18 +15,19 @@ import { Audio } from "expo-av";
 
 export default function PackageIdForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
-  const [arrayPackage, setArrayPackage] = useState([]);
+  //const [arrayPackage, setArrayPackage] = useState([]);
   const { urlInsert } = Constants;
   const inputRef = useRef();
-  const { data, count, id_user, user, inBd, code } = route.params;
-  const [countCurrent, setCountCurrent] = useState(0);
-  const datajs = JSON.parse(JSON.stringify(data));
-
+  const { id_user, user, data } = route.params;
+  //const [countCurrent, setCountCurrent] = useState(0);
+  const [databox, setDatabox] = useState(data); //JSON.parse(JSON.stringify(data));
+  //console.log(data);
   useEffect(() => {
-    inputRef.current.focus();
-  }, []);
+    // inputRef.current.focus();
+    setDatabox(data);
+  }, [data]);
 
-  const handlerInsert = async (package_id) => {
+  const handlerInsert = async (package_id, code) => {
     await axios
       .post(urlInsert, { code: code, package_id: package_id, fk_user: id_user })
       .then((response) => {
@@ -38,21 +39,22 @@ export default function PackageIdForm({ navigation, route }) {
   };
 
   const handlerFinish = () => {
-    setCountCurrent(0);
+    // setCountCurrent(0);
     navigation.goBack();
   };
 
-  const Box = () => {
+  const Box = ({ manifest }) => {
     return (
       <View style={styles.wrapper}>
+        <Text>{manifest[0].code}</Text>
         <View style={styles.container2}>
           <View style={[styles.box, styles.box1]}>
             <Text style={styles.titleBox}>ACTUAL</Text>
-            <Text style={styles.counter}>{countCurrent + inBd.length}</Text>
+            <Text style={styles.counter}>{manifest[0].inBD.length}</Text>
           </View>
           <View style={[styles.box, styles.box2]}>
             <Text style={styles.titleBox}>TOTAL</Text>
-            <Text style={styles.counter}>{count}</Text>
+            <Text style={styles.counter}>{manifest[0].data.length}</Text>
           </View>
         </View>
       </View>
@@ -61,24 +63,47 @@ export default function PackageIdForm({ navigation, route }) {
 
   const ReadCode = async (text) => {
     setManifest(text);
-    let man = datajs.find((p) => p.packageId === text);
+    let man = "";
+    let idx = "";
+    let inBD = false;
+    for (let x = 0; x < databox.length; x++) {
+      let manBol = await databox[x][0].data.find((p) => p.packageId === text);
+      let inBD_ = await databox[x][0].inBD.includes(text);
 
-    if (man === undefined) {
+      if (manBol !== undefined) {
+        man = manBol;
+        idx = x;
+      }
+      if (inBD_) {
+        inBD = inBD_;
+      }
+    }
+    if (man === "") {
       console.log("no encontrado");
       alertNotExist();
     } else {
-      let type_ = JSON.parse(JSON.stringify(man)).type;
-      const pack = arrayPackage.includes(text);
-      const pack2 = JSON.stringify(inBd).includes(text);
-      if (!pack && !pack2) {
-        setArrayPackage((oldArray) => [...oldArray, text]);
-        // console.log(arrayPackage);
-        handlerInsert(text);
-        setCountCurrent(countCurrent + 1);
-        type_ === "Mixed" ? soundMixta() : soundPura();
-      } else {
+      if (inBD) {
+        console.log("ya esta pinchado");
         alertExist();
+      } else {
+        // console.log(man);
+        let type_ = man.type;
+        let code = man.code;
+        console.log(type_);
+        databox[idx][0].inBD.push(text);
+        type_ === "Mixed" ? soundMixta() : soundPura();
+        handlerInsert(text, code);
       }
+
+      //  console.log(databox);
+      // if (!pack && !pack2) {
+      //   setArrayPackage((oldArray) => [...oldArray, text]);
+      //   handlerInsert(text);
+      //   setCountCurrent(countCurrent + 1);
+      //   type_ === "Mixed" ? soundMixta() : soundPura();
+      // } else {
+      //   alertExist();
+      // }
     }
 
     setManifest("");
@@ -145,7 +170,7 @@ export default function PackageIdForm({ navigation, route }) {
             <Input
               inputContainerStyle={styles.SectionStyle}
               placeholder=" ID Manifiesto"
-              ref={inputRef}
+              // ref={inputRef}
               value={manifest}
               onSubmitEditing={Keyboard.dismiss}
               onChange={(e) => ReadCode(e.nativeEvent.text)}
@@ -153,8 +178,11 @@ export default function PackageIdForm({ navigation, route }) {
 
             {/* <Button title="OK" onPress={() => handlerButton()} /> */}
           </View>
-          <Box />
-          <View style={{ width: "80%", marginTop: 30 }}>
+          {databox.map((manifest, index) => (
+            <Box key={index} manifest={manifest} />
+          ))}
+
+          <View style={{ width: "80%", marginTop: 20, marginBottom: 10 }}>
             <Button title="OK" onPress={() => handlerFinish()} />
             {/* <Button title="OK" onPress={() => sound()} /> */}
           </View>
@@ -202,8 +230,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   box: {
-    width: 140,
-    height: 140,
+    width: 80,
+    height: 80,
   },
   box1: {
     backgroundColor: "#2196F3",
@@ -215,12 +243,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   titleBox: {
-    fontSize: 25,
+    fontSize: 15,
     color: "white",
     fontWeight: "bold",
   },
   counter: {
-    fontSize: 60,
+    fontSize: 40,
     color: "white",
     fontWeight: "bold",
   },

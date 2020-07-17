@@ -3,45 +3,90 @@ import { View, Text, SafeAreaView, StyleSheet, Alert } from "react-native";
 import { Input, Button } from "react-native-elements";
 import axios from "axios";
 import Constants from "../../../utils/Constants";
+import Loading from "../../../components/Loading";
 
 export default function OperatorForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
+  const [arrayManifests, setArrayManifests] = useState([]);
+  const [countMan, setCountMan] = useState(0);
   const { user, id_user } = route.params;
-  // console.log(route.params);
-  const { urlOrdersManifests } = Constants;
+  const [isVisibleLoading, setIsvisibleLoading] = useState(false);
+  const { urlOrdersManifests, urlManifests } = Constants;
 
-  const handlerButton = async () => {
-    await axios
-      .post(urlOrdersManifests, { code: manifest })
-      .then((response) => {
-        console.log(response.data.inBd);
-        if (response.data.data.length === 0) {
-          alertManifest();
-        } else {
-          setManifest("");
-          navigation.navigate("package", {
-            data: response.data.data,
-            count: response.data.data.length,
-            inBd: response.data.inBd,
-            code: manifest,
-            user: user,
-            id_user: id_user,
-          });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const handlerButton = async (arrayManifests) => {
+    if (arrayManifests.length === 0) {
+      alertPickup();
+    } else {
+      setIsvisibleLoading(true);
+      await axios
+        .post(urlOrdersManifests, { code: arrayManifests })
+        .then((response) => {
+          if (response.data.length === 0) {
+            alertManifest();
+          } else {
+            setManifest("");
+            setArrayManifests([]);
+            setCountMan(0);
+
+            navigation.navigate("package", {
+              data: response.data,
+              user: user,
+              id_user: id_user,
+            });
+            setIsvisibleLoading(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
-  const alertManifest = () =>
-    Alert.alert(
-      "Alerta",
-      "Manifiesto no existe",
-      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-      { cancelable: false }
-    );
+  const ReadCode = async (manifest) => {
+    const pack = arrayManifests.includes(manifest);
 
+    if (!pack) {
+      setIsvisibleLoading(true);
+      await axios
+        .post(urlManifests, { code: manifest })
+        .then((response) => {
+          setIsvisibleLoading(false);
+          if (response.data[0].total > 0) {
+            setArrayManifests((oldArray) => [...oldArray, manifest]);
+            setCountMan(countMan + 1);
+          } else {
+            alertManifest();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsvisibleLoading(false);
+        });
+      setManifest("");
+    } else {
+      alertExist();
+    }
+  };
+
+  const handlerRefresh = () => {
+    setArrayManifests([]);
+    setCountMan(0);
+  };
+
+  const alertPickup = () =>
+    Alert.alert("Alerta", "Debes pinchar Manifiesto", [{ text: "OK" }], {
+      cancelable: false,
+    });
+
+  const alertManifest = () =>
+    Alert.alert("Alerta", "Manifiesto no existe", [{ text: "OK" }], {
+      cancelable: false,
+    });
+
+  const alertExist = () =>
+    Alert.alert("Alerta", "Manifiesto ya está pinchado", [{ text: "OK" }], {
+      cancelable: false,
+    });
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -53,6 +98,11 @@ export default function OperatorForm({ navigation, route }) {
       >
         <Text>{user}</Text>
       </View>
+      <Button
+        title={"Limpiar"}
+        buttonStyle={{ backgroundColor: "red" }}
+        onPress={() => handlerRefresh()}
+      />
       <View style={styles.container}>
         <View>
           <Text style={styles.title}>Ingrese Manifiesto</Text>
@@ -62,15 +112,20 @@ export default function OperatorForm({ navigation, route }) {
             inputContainerStyle={styles.SectionStyle}
             placeholder=" ID Manifiesto"
             value={manifest}
-            onChange={(e) => setManifest(e.nativeEvent.text)}
+            onChange={(e) => ReadCode(e.nativeEvent.text)}
           />
         </View>
         <Button
-          title="OK"
+          title={countMan.toString()}
           containerStyle={{ width: "80%" }}
-          onPress={() => handlerButton()}
+          onPress={() => handlerButton(arrayManifests)}
         />
+        {arrayManifests.map((manifest, index) => (
+          <Text key={index}>{manifest}</Text>
+        ))}
       </View>
+
+      {<Loading isVisible={isVisibleLoading} text="Cargando" />}
     </SafeAreaView>
   );
 }
