@@ -46,7 +46,6 @@ export default function LoginForm(props) {
         toastRef.current.show("Error al cargar usuario, vuelva a ingresar");
       }
     };
-
     getRememberedUser();
   }, []);
 
@@ -103,7 +102,6 @@ export default function LoginForm(props) {
           await axios
             .post(urlMysql, params)
             .then((response) => {
-              //console.log(response);
               if (Platform.OS === "ios") {
                 if (response.data.id == "null") {
                   toastRef.current.show("Credenciales inválidas");
@@ -120,8 +118,8 @@ export default function LoginForm(props) {
                 } else {
                   rememberUser();
                   navigation.navigate("options", {
-                    usuario: response.data.name,
-                    // nombre: response.data.name,
+                    usuario: response.data.id,
+                    nombre: response.data.nombre,
                   });
                 }
               }
