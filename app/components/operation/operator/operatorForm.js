@@ -24,15 +24,13 @@ export default function OperatorForm({ navigation, route }) {
           if (response.data.length === 0) {
             alertManifest();
           } else {
-            setManifest("");
-            setArrayManifests([]);
-            setCountMan(0);
-
             navigation.navigate("package", {
               data: response.data,
               user: user,
               id_user: id_user,
             });
+
+            setManifest("");
             setIsvisibleLoading(false);
           }
         })
@@ -44,25 +42,27 @@ export default function OperatorForm({ navigation, route }) {
 
   const ReadCode = async (manifest) => {
     const pack = arrayManifests.includes(manifest);
-
+    console.log(manifest);
     if (!pack) {
-      setIsvisibleLoading(true);
-      await axios
-        .post(urlManifests, { code: manifest })
-        .then((response) => {
-          setIsvisibleLoading(false);
-          if (response.data[0].total > 0) {
-            setArrayManifests((oldArray) => [...oldArray, manifest]);
-            setCountMan(countMan + 1);
-          } else {
-            alertManifest();
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          setIsvisibleLoading(false);
-        });
-      setManifest("");
+      if (manifest.length > 25) {
+        setIsvisibleLoading(true);
+        await axios
+          .post(urlManifests, { code: manifest })
+          .then((response) => {
+            setIsvisibleLoading(false);
+            if (response.data[0].total > 0) {
+              setArrayManifests((oldArray) => [...oldArray, manifest]);
+              setCountMan(countMan + 1);
+            } else {
+              alertManifest();
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            setIsvisibleLoading(false);
+          });
+        setManifest("");
+      }
     } else {
       alertExist();
     }
@@ -87,6 +87,7 @@ export default function OperatorForm({ navigation, route }) {
     Alert.alert("Alerta", "Manifiesto ya está pinchado", [{ text: "OK" }], {
       cancelable: false,
     });
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View

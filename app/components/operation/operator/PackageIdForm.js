@@ -15,15 +15,14 @@ import { Audio } from "expo-av";
 
 export default function PackageIdForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
-  //const [arrayPackage, setArrayPackage] = useState([]);
-  const { urlInsert } = Constants;
+  const { urlInsert, urlInsertP } = Constants;
   const inputRef = useRef();
   const { id_user, user, data } = route.params;
-  //const [countCurrent, setCountCurrent] = useState(0);
-  const [databox, setDatabox] = useState(data); //JSON.parse(JSON.stringify(data));
-  //console.log(data);
+  const [databox, setDatabox] = useState(data);
+  // const [arrayMan, setArrayMan] = useState(arrayManifests);
+  // const [isDialogVisible, setIsDialogVisible] = useState(false);
+  // console.log(arrayMan);
   useEffect(() => {
-    // inputRef.current.focus();
     setDatabox(data);
   }, [data]);
 
@@ -38,10 +37,56 @@ export default function PackageIdForm({ navigation, route }) {
       });
   };
 
+  const handlerInsertP = async (package_id) => {
+    await axios
+      .post(urlInsertP, { package_id: package_id, fk_user: id_user })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const handlerFinish = () => {
-    // setCountCurrent(0);
     navigation.goBack();
   };
+
+  // const handlerButton = async (manifest) => {
+  //   console.log(manifest);
+  //   if (manifest === "" || manifest === undefined) {
+  //     inputMan();
+  //   } else {
+  //     const inMan = arrayMan.includes(manifest);
+
+  //     if (!inMan) {
+  //       setArrayMan((oldArray) => [...oldArray, manifest]);
+  //       console.log(arrayMan);
+
+  //       await axios
+  //         .post(urlOrdersManifests, { code: arrayMan })
+  //         .then((response) => {
+  //           if (response.data.length === 0) {
+  //             alertManifest();
+  //           } else {
+  //             console.log(response.data);
+  //             setDatabox(response.data);
+  //             // data: response.data,
+  //             // setManifest("");
+  //             // setArrayManifests([]);
+  //             // setCountMan(0);
+
+  //             setIsDialogVisible(false);
+  //           }
+  //         })
+  //         .catch((error) => {
+  //           console.log(error);
+  //         });
+  //     } else {
+  //       alert("Manifiesto ya está pinchado");
+  //     }
+  //   }
+  // };
 
   const Box = ({ manifest }) => {
     return (
@@ -80,40 +125,45 @@ export default function PackageIdForm({ navigation, route }) {
     }
     if (man === "") {
       console.log("no encontrado");
-      alertNotExist();
+      alertNotExist(text);
     } else {
       if (inBD) {
         console.log("ya esta pinchado");
         alertExist();
       } else {
-        // console.log(man);
         let type_ = man.type;
         let code = man.code;
         console.log(type_);
         databox[idx][0].inBD.push(text);
-        type_ === "Mixed" ? soundMixta() : soundPura();
+        //type_ === "Mixed" ? soundMixta() : soundPura();
+        if (type_ == "MIXTA") {
+          soundMixta();
+        }
+        if (type_ == "RM") {
+          soundRM();
+        }
+        if (type_ == "REGIONES") {
+          soundRegiones();
+        }
         handlerInsert(text, code);
       }
-
-      //  console.log(databox);
-      // if (!pack && !pack2) {
-      //   setArrayPackage((oldArray) => [...oldArray, text]);
-      //   handlerInsert(text);
-      //   setCountCurrent(countCurrent + 1);
-      //   type_ === "Mixed" ? soundMixta() : soundPura();
-      // } else {
-      //   alertExist();
-      // }
     }
 
     setManifest("");
   };
 
-  const alertNotExist = () =>
+  const alertNotExist = (text) =>
     Alert.alert(
-      "Alerta",
       "Pedido no está en la base",
-      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+      "Guardar pedido?",
+      [
+        { text: "GUARDAR", onPress: () => handlerInsertP(text) },
+        {
+          text: "CANCELAR",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+      ],
       { cancelable: false }
     );
 
@@ -124,6 +174,28 @@ export default function PackageIdForm({ navigation, route }) {
       [{ text: "OK", onPress: () => console.log("OK Pressed") }],
       { cancelable: false }
     );
+
+  // const alertManifest = () =>
+  //   Alert.alert("Alerta", "Manifiesto no existe", [{ text: "OK" }], {
+  //     cancelable: false,
+  //   });
+
+  // function InputManifest() {
+  //   return (
+  //     <DialogInput
+  //       isDialogVisible={isDialogVisible}
+  //       title={"Ingreso de nuevo manifiesto"}
+  //       message={"Debes pinchar manifiesto"}
+  //       hintInput={"ID MANIFIESTO"}
+  //       submitInput={(inputText) => {
+  //         handlerButton(inputText);
+  //       }}
+  //       closeDialog={() => {
+  //         setIsDialogVisible(false);
+  //       }}
+  //     ></DialogInput>
+  //   );
+  // }
 
   async function soundMixta() {
     const soundObject = new Audio.Sound();
@@ -137,12 +209,23 @@ export default function PackageIdForm({ navigation, route }) {
       // An error occurred!
     }
   }
-  async function soundPura() {
+
+  async function soundRegiones() {
     const soundObject = new Audio.Sound();
     try {
       await soundObject.loadAsync(
-        require("../../../../assets/sound/translate_tts_pura.mp3")
+        require("../../../../assets/sound/regiones.mp3")
       );
+      await soundObject.playAsync();
+      // Your sound is playing!
+    } catch (error) {
+      // An error occurred!
+    }
+  }
+  async function soundRM() {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(require("../../../../assets/sound/RM.mp3"));
       await soundObject.playAsync();
       // Your sound is playing!
     } catch (error) {
@@ -162,6 +245,11 @@ export default function PackageIdForm({ navigation, route }) {
         >
           <Text>{user}</Text>
         </View>
+        {/* <Button
+          title={"Agregar Manifiesto"}
+          buttonStyle={{ backgroundColor: "#1A949C" }}
+          onPress={() => setIsDialogVisible(true)}
+        /> */}
         <View style={styles.container}>
           <View>
             <Text style={styles.title}>Ingrese Package ID</Text>
@@ -175,8 +263,6 @@ export default function PackageIdForm({ navigation, route }) {
               onSubmitEditing={Keyboard.dismiss}
               onChange={(e) => ReadCode(e.nativeEvent.text)}
             />
-
-            {/* <Button title="OK" onPress={() => handlerButton()} /> */}
           </View>
           {databox.map((manifest, index) => (
             <Box key={index} manifest={manifest} />
@@ -184,8 +270,8 @@ export default function PackageIdForm({ navigation, route }) {
 
           <View style={{ width: "80%", marginTop: 20, marginBottom: 10 }}>
             <Button title="OK" onPress={() => handlerFinish()} />
-            {/* <Button title="OK" onPress={() => sound()} /> */}
           </View>
+          {/* <InputManifest /> */}
         </View>
       </ScrollView>
     </SafeAreaView>
