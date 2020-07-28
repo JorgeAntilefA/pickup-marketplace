@@ -155,7 +155,7 @@ export default function PackageIdForm({ navigation, route }) {
   const alertNotExist = (text) =>
     Alert.alert(
       "Pedido no está en la base",
-      "Guardar pedido?",
+      "Guardar pedido " + text + " ?",
       [
         { text: "GUARDAR", onPress: () => handlerInsertP(text) },
         {
