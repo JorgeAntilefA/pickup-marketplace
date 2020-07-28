@@ -88,6 +88,21 @@ export default function OperatorForm({ navigation, route }) {
       cancelable: false,
     });
 
+  const CleanManifest = () =>
+    Alert.alert(
+      "Borrar Manifiestos",
+      "Quieres borrar los manifiestos pinchados?",
+      [
+        { text: "OK", onPress: () => handlerRefresh() },
+        {
+          text: "CANCELAR",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+    );
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -102,7 +117,7 @@ export default function OperatorForm({ navigation, route }) {
       <Button
         title={"Limpiar"}
         buttonStyle={{ backgroundColor: "red" }}
-        onPress={() => handlerRefresh()}
+        onPress={() => CleanManifest()}
       />
       <View style={styles.container}>
         <View>
