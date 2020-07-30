@@ -12,25 +12,35 @@ import { Input, Button } from "react-native-elements";
 import axios from "axios";
 import Constants from "../../../utils/Constants";
 import { Audio } from "expo-av";
+import Toast from "react-native-easy-toast";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function PackageIdForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
+  const isFocused = useIsFocused();
   const { urlInsert, urlInsertP } = Constants;
-  const inputRef = useRef();
-  const { id_user, user, data } = route.params;
-  const [databox, setDatabox] = useState(data);
+  const toastRef = useRef();
+
+  const { id_user, user, data, total } = route.params;
+  const [count1, setCount1] = useState(0);
+  // const [databox, setDatabox] = useState(data);
+  //  console.log(total);
+
+  const [count2, setCount2] = useState(0);
   // const [arrayMan, setArrayMan] = useState(arrayManifests);
   // const [isDialogVisible, setIsDialogVisible] = useState(false);
-  // console.log(arrayMan);
+  //console.log(count1);
   useEffect(() => {
-    setDatabox(data);
+    setCount1(total);
   }, [data]);
 
   const handlerInsert = async (package_id, code) => {
     await axios
       .post(urlInsert, { code: code, package_id: package_id, fk_user: id_user })
       .then((response) => {
-        console.log(response.data);
+        //console.log(response.data);
+        setCount1(count1 + 1);
+        toastRef.current.show("GUARDADO");
       })
       .catch((error) => {
         console.log(error);
@@ -41,7 +51,8 @@ export default function PackageIdForm({ navigation, route }) {
     await axios
       .post(urlInsertP, { package_id: package_id, fk_user: id_user })
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
+        setCount2(count2 + 1);
       })
       .catch((error) => {
         console.log(error);
@@ -49,6 +60,8 @@ export default function PackageIdForm({ navigation, route }) {
   };
 
   const handlerFinish = () => {
+    setCount1(0);
+    setCount2(0);
     navigation.goBack();
   };
 
@@ -106,14 +119,29 @@ export default function PackageIdForm({ navigation, route }) {
     );
   };
 
+  const BoxCount = () => {
+    return (
+      <View style={styles.wrapper}>
+        <View style={styles.container2}>
+          <View style={[styles.boxCount, styles.box12]}>
+            <Text style={styles.counter2}>{count1}</Text>
+          </View>
+          <View style={[styles.boxCount, styles.box22]}>
+            <Text style={styles.counter2}>{count2}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   const ReadCode = async (text) => {
     setManifest(text);
     let man = "";
     let idx = "";
     let inBD = false;
-    for (let x = 0; x < databox.length; x++) {
-      let manBol = await databox[x][0].data.find((p) => p.packageId === text);
-      let inBD_ = await databox[x][0].inBD.includes(text);
+    for (let x = 0; x < data.length; x++) {
+      let manBol = await data[x][0].data.find((p) => p.packageId === text);
+      let inBD_ = await data[x][0].inBD.find((p) => p.package_id === text);
 
       if (manBol !== undefined) {
         man = manBol;
@@ -123,6 +151,7 @@ export default function PackageIdForm({ navigation, route }) {
         inBD = inBD_;
       }
     }
+    console.log(inBD);
     if (man === "") {
       console.log("no encontrado");
       alertNotExist(text);
@@ -134,7 +163,7 @@ export default function PackageIdForm({ navigation, route }) {
         let type_ = man.type;
         let code = man.code;
         console.log(type_);
-        databox[idx][0].inBD.push(text);
+        data[idx][0].inBD.push(text);
         //type_ === "Mixed" ? soundMixta() : soundPura();
         if (type_ == "MIXTA") {
           soundMixta();
@@ -245,15 +274,27 @@ export default function PackageIdForm({ navigation, route }) {
         >
           <Text>{user}</Text>
         </View>
-        {/* <Button
-          title={"Agregar Manifiesto"}
-          buttonStyle={{ backgroundColor: "#1A949C" }}
-          onPress={() => setIsDialogVisible(true)}
-        /> */}
         <View style={styles.container}>
-          <View>
-            <Text style={styles.title}>Ingrese Package ID</Text>
-          </View>
+          <Text style={styles.title}>Ingrese Package ID</Text>
+          {/* <View style={styles.container2}>
+            <Button
+              buttonStyle={{
+                width: 50,
+                backgroundColor: "#0000FF",
+                fontSize: 40,
+              }}
+              title={count1.toString()}
+            />
+            <Button
+              buttonStyle={{
+                width: 50,
+                backgroundColor: "#E72B11",
+                marginLeft: 15,
+              }}
+              title={count2.toString()}
+            />
+          </View> */}
+          <BoxCount />
           <View>
             <Input
               inputContainerStyle={styles.SectionStyle}
@@ -264,7 +305,7 @@ export default function PackageIdForm({ navigation, route }) {
               onChange={(e) => ReadCode(e.nativeEvent.text)}
             />
           </View>
-          {databox.map((manifest, index) => (
+          {data.map((manifest, index) => (
             <Box key={index} manifest={manifest} />
           ))}
 
@@ -273,7 +314,19 @@ export default function PackageIdForm({ navigation, route }) {
           </View>
           {/* <InputManifest /> */}
         </View>
+        <Toast
+          style={styles.toast}
+          ref={toastRef}
+          position="center"
+          opacity={0.5}
+        />
       </ScrollView>
+      <Toast
+        style={styles.toast}
+        ref={toastRef}
+        position="center"
+        opacity={0.5}
+      />
     </SafeAreaView>
   );
 }
@@ -302,13 +355,6 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
   },
-  //   container: {
-  //     flex: 0.5,
-  //     flexDirection: "row",
-  //     justifyContent: "flex-start", //replace with flex-end or center
-  //     borderBottomWidth: 1,
-  //     borderBottomColor: "#000",
-  //   },
   container2: {
     flexDirection: "row",
     justifyContent: "flex-start", //replace with flex-end or center
@@ -328,6 +374,19 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     alignItems: "center",
   },
+  boxCount: {
+    width: 50,
+    height: 50,
+  },
+  box12: {
+    backgroundColor: "#0000FF",
+    alignItems: "center",
+  },
+  box22: {
+    backgroundColor: "#E72B11",
+    marginLeft: 20,
+    alignItems: "center",
+  },
   titleBox: {
     fontSize: 15,
     color: "white",
@@ -337,5 +396,14 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: "white",
     fontWeight: "bold",
+  },
+  counter2: {
+    fontSize: 40,
+    color: "white",
+    fontWeight: "bold",
+  },
+  toast: {
+    marginTop: -30,
+    height: 40,
   },
 });

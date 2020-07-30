@@ -18,16 +18,23 @@ export default function OperatorForm({ navigation, route }) {
       alertPickup();
     } else {
       setIsvisibleLoading(true);
+
       await axios
         .post(urlOrdersManifests, { code: arrayManifests })
         .then((response) => {
           if (response.data.length === 0) {
             alertManifest();
           } else {
+            let total = 0;
+            for (let x = 0; x < response.data.length; x++) {
+              total = total + response.data[x][0].total;
+            }
+
             navigation.navigate("package", {
               data: response.data,
               user: user,
               id_user: id_user,
+              total: total,
             });
 
             setManifest("");
