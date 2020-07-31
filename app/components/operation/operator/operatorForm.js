@@ -22,12 +22,14 @@ export default function OperatorForm({ navigation, route }) {
       await axios
         .post(urlOrdersManifests, { code: arrayManifests })
         .then((response) => {
+          console.log(response.data.length);
           if (response.data.length === 0) {
             alertManifest();
           } else {
             let total = 0;
             for (let x = 0; x < response.data.length; x++) {
               total = total + response.data[x][0].total;
+              console.log("total:" + total);
             }
 
             navigation.navigate("package", {

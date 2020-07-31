@@ -151,7 +151,7 @@ export default function PackageIdForm({ navigation, route }) {
         inBD = inBD_;
       }
     }
-    console.log(inBD);
+    console.log("enbase:" + inBD);
     if (man === "") {
       console.log("no encontrado");
       alertNotExist(text);
@@ -393,12 +393,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   counter: {
-    fontSize: 40,
+    fontSize: 30,
     color: "white",
     fontWeight: "bold",
   },
   counter2: {
-    fontSize: 40,
+    fontSize: 20,
     color: "white",
     fontWeight: "bold",
   },
