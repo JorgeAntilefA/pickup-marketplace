@@ -1,17 +1,50 @@
-import React, { useState } from "react";
-import { View, Text, SafeAreaView, StyleSheet, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  Alert,
+  BackHandler,
+} from "react-native";
 import { Input, Button } from "react-native-elements";
 import axios from "axios";
 import Constants from "../../../utils/Constants";
 import Loading from "../../../components/Loading";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function OperatorForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
   const [arrayManifests, setArrayManifests] = useState([]);
   const [countMan, setCountMan] = useState(0);
-  const { user, id_user } = route.params;
+  const { user, id_user, fecha } = route.params;
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
-  const { urlOrdersManifests, urlManifests } = Constants;
+  const { urlOrdersManifests, urlManifests, urlTemporaryMan } = Constants;
+  // console.log(fecha);
+
+  useEffect(() => {
+    console.log("foco");
+    const getManifests = async () => {
+      await axios
+        .post(urlTemporaryMan)
+        .then((response) => {
+          setArrayManifests([]);
+          for (let x = 0; x < response.data.length; x++) {
+            setArrayManifests((oldArray) => [
+              ...oldArray,
+              response.data[x].code,
+            ]);
+            //console.log(response.data[x].code);
+          }
+          setCountMan(response.data.length);
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsvisibleLoading(false);
+        });
+    };
+    getManifests();
+  }, [fecha]);
 
   const handlerButton = async (arrayManifests) => {
     if (arrayManifests.length === 0) {
@@ -22,14 +55,14 @@ export default function OperatorForm({ navigation, route }) {
       await axios
         .post(urlOrdersManifests, { code: arrayManifests })
         .then((response) => {
-          console.log(response.data.length);
+          // console.log(response.data.length);
           if (response.data.length === 0) {
             alertManifest();
           } else {
             let total = 0;
             for (let x = 0; x < response.data.length; x++) {
               total = total + response.data[x][0].total;
-              console.log("total:" + total);
+              // console.log("total:" + total);
             }
 
             navigation.navigate("package", {
@@ -63,7 +96,7 @@ export default function OperatorForm({ navigation, route }) {
               setArrayManifests((oldArray) => [...oldArray, manifest]);
               setCountMan(countMan + 1);
             } else {
-              alertManifest();
+              alertManifest(manifest);
             }
           })
           .catch((error) => {
@@ -87,10 +120,15 @@ export default function OperatorForm({ navigation, route }) {
       cancelable: false,
     });
 
-  const alertManifest = () =>
-    Alert.alert("Alerta", "Manifiesto no existe", [{ text: "OK" }], {
-      cancelable: false,
-    });
+  const alertManifest = (manifest) =>
+    Alert.alert(
+      "Alerta",
+      "Manifiesto no existe: " + manifest,
+      [{ text: "OK" }],
+      {
+        cancelable: false,
+      }
+    );
 
   const alertExist = () =>
     Alert.alert("Alerta", "Manifiesto ya está pinchado", [{ text: "OK" }], {
@@ -128,28 +166,29 @@ export default function OperatorForm({ navigation, route }) {
         buttonStyle={{ backgroundColor: "red" }}
         onPress={() => CleanManifest()}
       />
-      <View style={styles.container}>
-        <View>
-          <Text style={styles.title}>Ingrese Manifiesto</Text>
-        </View>
-        <View>
-          <Input
-            inputContainerStyle={styles.SectionStyle}
-            placeholder=" ID Manifiesto"
-            value={manifest}
-            onChange={(e) => ReadCode(e.nativeEvent.text)}
+      <ScrollView>
+        <View style={styles.container}>
+          <View>
+            <Text style={styles.title}>Ingrese Manifiesto</Text>
+          </View>
+          <View>
+            <Input
+              inputContainerStyle={styles.SectionStyle}
+              placeholder=" ID Manifiesto"
+              value={manifest}
+              onChange={(e) => ReadCode(e.nativeEvent.text)}
+            />
+          </View>
+          <Button
+            title={countMan.toString()}
+            containerStyle={{ width: "80%" }}
+            onPress={() => handlerButton(arrayManifests)}
           />
+          {arrayManifests
+            .map((manifest, index) => <Text key={index}>{manifest}</Text>)
+            .reverse()}
         </View>
-        <Button
-          title={countMan.toString()}
-          containerStyle={{ width: "80%" }}
-          onPress={() => handlerButton(arrayManifests)}
-        />
-        {arrayManifests.map((manifest, index) => (
-          <Text key={index}>{manifest}</Text>
-        ))}
-      </View>
-
+      </ScrollView>
       {<Loading isVisible={isVisibleLoading} text="Cargando" />}
     </SafeAreaView>
   );

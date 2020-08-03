@@ -128,6 +128,7 @@ export default function LoginForm(props) {
               console.log(error);
             });
         } else {
+          let fecha = new Date();
           await axios
             .post(urlLogin, { name: username, password: password })
             .then((response) => {
@@ -138,6 +139,7 @@ export default function LoginForm(props) {
                 navigation.navigate("operator", {
                   id_user: response.data[0].id_user,
                   user: response.data[0].name,
+                  fecha: fecha,
                 });
               }
             })
