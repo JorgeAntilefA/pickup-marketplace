@@ -35,7 +35,7 @@ export default function PackageIdForm({ navigation, route }) {
   }, [data]);
 
   const handlerInsert = async (package_id, code) => {
-    await axios
+    axios
       .post(urlInsert, { code: code, package_id: package_id, fk_user: id_user })
       .then((response) => {
         //console.log(response.data);
@@ -48,7 +48,7 @@ export default function PackageIdForm({ navigation, route }) {
   };
 
   const handlerInsertP = async (package_id) => {
-    await axios
+    axios
       .post(urlInsertP, { package_id: package_id, fk_user: id_user })
       .then((response) => {
         // console.log(response.data);

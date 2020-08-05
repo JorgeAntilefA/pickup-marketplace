@@ -20,31 +20,33 @@ export default function OperatorForm({ navigation, route }) {
   const { user, id_user, fecha } = route.params;
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
   const { urlOrdersManifests, urlManifests, urlTemporaryMan } = Constants;
-  // console.log(fecha);
+  console.log(fecha);
 
   useEffect(() => {
     console.log("foco");
     const getManifests = async () => {
-      await axios
-        .post(urlTemporaryMan)
-        .then((response) => {
-          setArrayManifests([]);
-          for (let x = 0; x < response.data.length; x++) {
-            setArrayManifests((oldArray) => [
-              ...oldArray,
-              response.data[x].code,
-            ]);
-            //console.log(response.data[x].code);
-          }
-          setCountMan(response.data.length);
-        })
-        .catch((error) => {
-          console.log(error);
-          setIsvisibleLoading(false);
-        });
+      loadManifests();
     };
     getManifests();
   }, [fecha]);
+
+  async function loadManifests() {
+    setIsvisibleLoading(true);
+    await axios
+      .post(urlTemporaryMan)
+      .then((response) => {
+        setArrayManifests([]);
+        for (let x = 0; x < response.data.length; x++) {
+          setArrayManifests((oldArray) => [...oldArray, response.data[x].code]);
+        }
+        setCountMan(response.data.length);
+        setIsvisibleLoading(false);
+      })
+      .catch((error) => {
+        console.log("manifestTem" + error);
+        setIsvisibleLoading(false);
+      });
+  }
 
   const handlerButton = async (arrayManifests) => {
     if (arrayManifests.length === 0) {
@@ -161,11 +163,22 @@ export default function OperatorForm({ navigation, route }) {
       >
         <Text>{user}</Text>
       </View>
-      <Button
-        title={"Limpiar"}
-        buttonStyle={{ backgroundColor: "red" }}
-        onPress={() => CleanManifest()}
-      />
+      <View style={{ flexDirection: "row" }}>
+        <View style={{ width: "50%", height: 50 }}>
+          <Button
+            title={"Limpiar"}
+            buttonStyle={{ backgroundColor: "red" }}
+            onPress={() => CleanManifest()}
+          />
+        </View>
+        <View style={{ width: "50%", height: 50 }}>
+          <Button
+            title={"Actualizar"}
+            buttonStyle={{ backgroundColor: "green" }}
+            onPress={() => loadManifests()}
+          />
+        </View>
+      </View>
       <ScrollView>
         <View style={styles.container}>
           <View>
