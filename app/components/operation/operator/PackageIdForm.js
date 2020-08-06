@@ -12,35 +12,56 @@ import { Input, Button } from "react-native-elements";
 import axios from "axios";
 import Constants from "../../../utils/Constants";
 import { Audio } from "expo-av";
+import Loading from "../../../components/Loading";
 import Toast from "react-native-easy-toast";
-import { useIsFocused } from "@react-navigation/native";
 
 export default function PackageIdForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
-  const isFocused = useIsFocused();
-  const { urlInsert, urlInsertP } = Constants;
+
+  const { urlInsert, urlInsertP, urlCountProductivity } = Constants;
   const toastRef = useRef();
-
-  const { id_user, user, data, total } = route.params;
+  const [isVisibleLoading, setIsvisibleLoading] = useState(false);
+  const { id_user, user, fecha } = route.params;
   const [count1, setCount1] = useState(0);
-  // const [databox, setDatabox] = useState(data);
-  //  console.log(total);
-
   const [count2, setCount2] = useState(0);
-  // const [arrayMan, setArrayMan] = useState(arrayManifests);
-  // const [isDialogVisible, setIsDialogVisible] = useState(false);
-  //console.log(count1);
   useEffect(() => {
-    setCount1(total);
-  }, [data]);
+    //setCount1(total);
+    loadCounters();
+    console.log("useeeffect");
+  }, [fecha]);
 
-  const handlerInsert = async (package_id, code) => {
-    axios
-      .post(urlInsert, { code: code, package_id: package_id, fk_user: id_user })
+  async function loadCounters() {
+    setIsvisibleLoading(true);
+    await axios
+      .get(urlCountProductivity)
       .then((response) => {
-        //console.log(response.data);
-        setCount1(count1 + 1);
-        toastRef.current.show("GUARDADO");
+        setCount1(response.data.total);
+        setCount2(response.data.fuera_man);
+        setIsvisibleLoading(false);
+      })
+      .catch((error) => {
+        console.log("manifestTem" + error);
+        setIsvisibleLoading(false);
+      });
+  }
+
+  const handlerInsert = async (package_id) => {
+    await axios
+      .post(urlInsert, { package_id: package_id, fk_user: id_user })
+      .then((response) => {
+        console.log(response.data);
+        if (response.data == "2") {
+          setCount1(count1 + 1);
+          toastRef.current.show("GUARDADO");
+        }
+        if (response.data == "1") {
+          soundError();
+          alertNotExist(package_id);
+        }
+        if (response.data == "0") {
+          soundError();
+          alertExist();
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -123,11 +144,13 @@ export default function PackageIdForm({ navigation, route }) {
     return (
       <View style={styles.wrapper}>
         <View style={styles.container2}>
-          <View style={[styles.boxCount, styles.box12]}>
-            <Text style={styles.counter2}>{count1}</Text>
+          <View style={[styles.box, styles.box1]}>
+            {/* <Text style={styles.titleBox}>ACTUAL</Text> */}
+            <Text style={styles.counter}>{count1}</Text>
           </View>
-          <View style={[styles.boxCount, styles.box22]}>
-            <Text style={styles.counter2}>{count2}</Text>
+          <View style={[styles.box, styles.box2]}>
+            {/* <Text style={styles.titleBox}>TOTAL</Text> */}
+            <Text style={styles.counter}>{count2}</Text>
           </View>
         </View>
       </View>
@@ -136,47 +159,48 @@ export default function PackageIdForm({ navigation, route }) {
 
   const ReadCode = async (text) => {
     setManifest(text);
-    let man = "";
-    let idx = "";
-    let inBD = false;
-    for (let x = 0; x < data.length; x++) {
-      let manBol = await data[x][0].data.find((p) => p.packageId === text);
-      let inBD_ = await data[x][0].inBD.find((p) => p.package_id === text);
+    // let man = "";
+    // let idx = "";
+    //let inBD = false;
+    // for (let x = 0; x < data.length; x++) {
+    //   let manBol = await data[x][0].data.find((p) => p.packageId === text);
+    //   //let inBD_ = await data[x][0].inBD.find((p) => p.package_id === text);
 
-      if (manBol !== undefined) {
-        man = manBol;
-        idx = x;
-      }
-      if (inBD_) {
-        inBD = inBD_;
-      }
-    }
-    console.log("enbase:" + inBD);
-    if (man === "") {
-      console.log("no encontrado");
-      alertNotExist(text);
-    } else {
-      if (inBD) {
-        console.log("ya esta pinchado");
-        alertExist();
-      } else {
-        let type_ = man.type;
-        let code = man.code;
-        console.log(type_);
-        data[idx][0].inBD.push(text);
-        //type_ === "Mixed" ? soundMixta() : soundPura();
-        if (type_ == "MIXTA") {
-          soundMixta();
-        }
-        if (type_ == "RM") {
-          soundRM();
-        }
-        if (type_ == "REGIONES") {
-          soundRegiones();
-        }
-        handlerInsert(text, code);
-      }
-    }
+    //   if (manBol !== undefined) {
+    //     man = manBol;
+    //     idx = x;
+    //   }
+    //   // if (inBD_) {
+    //   //   inBD = inBD_;
+    //   // }
+    // }
+    // console.log("enbase:" + inBD);
+    // if (man === "") {
+    //   console.log("no encontrado");
+    //   alertNotExist(text);
+    // } else {
+    //   // if (inBD) {
+    //   //   console.log("ya esta pinchado");
+    //   //   alertExist();
+    //   // } else {
+    //   let type_ = man.type;
+    //   let code = man.code;
+    //   console.log(type_);
+    //data[idx][0].inBD.push(text);
+    //type_ === "Mixed" ? soundMixta() : soundPura();
+    // if (type_ == "MIXTA") {
+    //   soundMixta();
+    // }
+    // if (type_ == "RM") {
+    //   soundRM();
+    // }
+    // if (type_ == "REGIONES") {
+    //   soundRegiones();
+    // }
+    // let code = "22";
+    handlerInsert(text);
+    // }
+    // }
 
     setManifest("");
   };
@@ -251,6 +275,27 @@ export default function PackageIdForm({ navigation, route }) {
       // An error occurred!
     }
   }
+
+  async function soundError() {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(
+        require("../../../../assets/sound/bicycle.mp3")
+      );
+      const status = await soundObject.playAsync();
+      setTimeout(() => {
+        soundObject.unloadAsync();
+        //  await soundObject.playAsync();
+        // soundObject.playAsync();
+      }, status.playableDurationMillis);
+
+      // Your sound is playing!
+    } catch (error) {
+      // An error occurred!
+      console.log(error);
+    }
+  }
+
   async function soundRM() {
     const soundObject = new Audio.Sound();
     try {
@@ -274,6 +319,11 @@ export default function PackageIdForm({ navigation, route }) {
         >
           <Text>{user}</Text>
         </View>
+        <Button
+          title={"Actualizar"}
+          buttonStyle={{ backgroundColor: "red" }}
+          onPress={() => loadCounters()}
+        />
         <View style={styles.container}>
           <Text style={styles.title}>Ingrese Package ID</Text>
           {/* <View style={styles.container2}>
@@ -305,9 +355,9 @@ export default function PackageIdForm({ navigation, route }) {
               onChange={(e) => ReadCode(e.nativeEvent.text)}
             />
           </View>
-          {data.map((manifest, index) => (
+          {/* {data.map((manifest, index) => (
             <Box key={index} manifest={manifest} />
-          ))}
+          ))} */}
 
           <View style={{ width: "80%", marginTop: 20, marginBottom: 10 }}>
             <Button title="OK" onPress={() => handlerFinish()} />
@@ -327,6 +377,7 @@ export default function PackageIdForm({ navigation, route }) {
         position="center"
         opacity={0.5}
       />
+      {<Loading isVisible={isVisibleLoading} text="Cargando" />}
     </SafeAreaView>
   );
 }
@@ -395,10 +446,11 @@ const styles = StyleSheet.create({
   counter: {
     fontSize: 30,
     color: "white",
+    marginTop: 20,
     fontWeight: "bold",
   },
   counter2: {
-    fontSize: 20,
+    fontSize: 40,
     color: "white",
     fontWeight: "bold",
   },

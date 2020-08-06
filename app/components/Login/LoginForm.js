@@ -136,7 +136,7 @@ export default function LoginForm(props) {
                 toastRef.current.show("Credenciales inválidas");
               } else {
                 rememberUser();
-                navigation.navigate("operator", {
+                navigation.navigate("package", {
                   id_user: response.data[0].id_user,
                   user: response.data[0].name,
                   fecha: fecha,
