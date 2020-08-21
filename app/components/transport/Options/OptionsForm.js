@@ -21,7 +21,7 @@ export default function OptionsForm(props) {
   const [finalizados, setFinalizados] = useState();
   const isFocused = useIsFocused();
   const toastRef = useRef();
-
+  console.log("usuario:" + usuario);
   useEffect(() => {
     const getButtons = async () => {
       setIsvisibleLoading(true);
@@ -33,6 +33,7 @@ export default function OptionsForm(props) {
       await axios
         .post(urlMysql, params)
         .then((response) => {
+          //   console.log(response);
           if (Platform.OS === "ios") {
             console.log(response);
             if (response.data.Nombre == "null") {

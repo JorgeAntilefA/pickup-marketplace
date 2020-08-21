@@ -43,7 +43,7 @@ export default function ListPointsForm(props) {
       .post(urlMysql, params)
       .then((response) => {
         setData(response.data);
-        console.log(response.data);
+        // console.log(response.data);
         // rememberOrders(response.data);
         setIsvisibleLoading(false);
         setRefreshing(false);
