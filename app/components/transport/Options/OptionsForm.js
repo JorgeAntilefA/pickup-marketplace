@@ -21,7 +21,7 @@ export default function OptionsForm(props) {
   const [finalizados, setFinalizados] = useState();
   const isFocused = useIsFocused();
   const toastRef = useRef();
-  console.log("usuario:" + usuario);
+
   useEffect(() => {
     const getButtons = async () => {
       setIsvisibleLoading(true);

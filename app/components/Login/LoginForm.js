@@ -73,7 +73,6 @@ export default function LoginForm(props) {
         type_user: selectedValue,
       };
 
-      console.log(credentials);
       await AsyncStorage.setItem(
         "@localStorage:credentials",
         JSON.stringify(credentials)
@@ -132,6 +131,7 @@ export default function LoginForm(props) {
           await axios
             .post(urlLogin, { name: username, password: password })
             .then((response) => {
+              console.log(response);
               if (response.data.length === 0) {
                 toastRef.current.show("Credenciales inválidas");
               } else {

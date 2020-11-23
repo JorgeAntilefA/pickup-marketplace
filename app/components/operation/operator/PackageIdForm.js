@@ -18,7 +18,8 @@ import Toast from "react-native-easy-toast";
 export default function PackageIdForm({ navigation, route }) {
   const [manifest, setManifest] = useState();
 
-  const { urlInsert, urlInsertP, urlCountProductivity } = Constants;
+  // const { urlInsert, urlInsertP, urlCountProductivity } = Constants;
+  const { urlInsert, urlCountProductivity } = Constants;
   const toastRef = useRef();
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
   const { id_user, user, fecha } = route.params;
@@ -36,6 +37,7 @@ export default function PackageIdForm({ navigation, route }) {
       .get(urlCountProductivity)
       .then((response) => {
         setCount1(response.data.total);
+        //setCount1(response.data.total);
         setCount2(response.data.fuera_man);
         setIsvisibleLoading(false);
       })
@@ -50,15 +52,15 @@ export default function PackageIdForm({ navigation, route }) {
       .post(urlInsert, { package_id: package_id, fk_user: id_user })
       .then((response) => {
         console.log(response.data);
-        if (response.data == "2") {
+        if (response.data == "1") {
           setCount1(count1 + 1);
           toastRef.current.show("GUARDADO");
         }
-        if (response.data == "1") {
+        if (response.data == "3") {
           soundError();
           alertNotExist(package_id);
         }
-        if (response.data == "0") {
+        if (response.data == "2") {
           soundError();
           alertExist();
         }
@@ -207,12 +209,12 @@ export default function PackageIdForm({ navigation, route }) {
 
   const alertNotExist = (text) =>
     Alert.alert(
-      "Pedido no está en la base",
-      "Guardar pedido " + text + " ?",
+      "Pedido  " + text + " no existe",
+      "Vuelve a pinchar",
       [
-        { text: "GUARDAR", onPress: () => handlerInsertP(text) },
+        // { text: "GUARDAR", onPress: () => handlerInsertP(text) },
         {
-          text: "CANCELAR",
+          text: "OK",
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel",
         },
