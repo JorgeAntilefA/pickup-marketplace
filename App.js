@@ -4,7 +4,8 @@ import * as eva from "@eva-design/eva";
 import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import Navigation from "./app/navigation/Navigation";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
-
+import { LogBox } from "react-native";
+LogBox.ignoreLogs(["Animated: `useNativeDriver`"]);
 export default function App() {
   return (
     <React.Fragment>

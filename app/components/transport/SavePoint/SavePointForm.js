@@ -17,7 +17,6 @@ import Toast from "react-native-easy-toast";
 import { Input } from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
 import * as Location from "expo-location";
-import * as Permissions from "expo-permissions";
 
 export default function SavePointForm(props) {
   const { navigation, route } = props;
@@ -61,23 +60,12 @@ export default function SavePointForm(props) {
   };
 
   async function LocationU() {
-    console.log("location");
-    const resultPermissions = await Permissions.askAsync(Permissions.LOCATION);
-    const statusPermissions = resultPermissions.permissions.location.status;
-
-    if (statusPermissions !== "granted") {
-      toastRef.current.show(
-        "Tienes que aceptar los permisos de localización",
-        3000
-      );
-    } else {
-      const loc = await Location.getCurrentPositionAsync({});
-      console.log(loc);
-      setLocation({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
+    let { status } = await Location.requestForegroundPermissionsAsync(); 
+    if (status !== "granted") {
+      AlertErrorPrint("Debes dar permisos de localización");
     }
+    let location = await Location.getCurrentPositionAsync({});
+    setLocation(location);
   }
 
   function PickerEstado() {
@@ -224,12 +212,19 @@ export default function SavePointForm(props) {
         AlertEstado();
       } else {
         setIsvisibleLoading(true);
-
-        if (location.latitude == null || !location.latitude) {
-          location.latitude = "0.0";
-        }
-        if (location.longitude == null) {
-          location.latitude = "0.0";
+        
+        // if (location.latitude == null || !location.latitude) {
+        //   location.latitude = "0.0";
+        // }
+        // if (location.longitude == null) {
+        //   location.latitude = "0.0";
+        // }
+        if (location) {
+          latitud = location.coords.latitude;
+          longitud = location.coords.longitude;
+        } else {
+          latitud = "0.0";
+          longitud = "0.0";
         }
 
         const params = new URLSearchParams();
@@ -239,8 +234,8 @@ export default function SavePointForm(props) {
         params.append("cantidad_pickup", bultos);
         params.append("EstadoFicha", selectedValueState);
         params.append("ComentarioFicha", comentario);
-        params.append("latitud_inicial", location.latitude);
-        params.append("longitud_inicial", location.longitude);
+        params.append("latitud_inicial", latitud);
+        params.append("longitud_inicial", longitud);
 
         await axios
           .post(urlMysql, params)

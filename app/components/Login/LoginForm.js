@@ -11,12 +11,14 @@ import {
   Platform,
   AsyncStorage,
   TouchableOpacity,
-  Picker,
 } from "react-native";
 import { Input, Icon } from "@ui-kitten/components";
 import axios from "axios";
 import Loading from "../Loading";
 import Constants from "./../../utils/Constants";
+import { Picker } from "@react-native-community/picker";
+import * as MediaLibrary from "expo-media-library";
+import { Camera } from "expo-camera";
 
 export default function LoginForm(props) {
   const { toastRef, navigation } = props;
@@ -47,6 +49,26 @@ export default function LoginForm(props) {
       }
     };
     getRememberedUser();
+
+    (async () => {
+      const cameraPermission = await Camera.requestPermissionsAsync();
+      const cameraRollPermission = await MediaLibrary.requestPermissionsAsync();
+
+      if (
+        cameraPermission.status === "granted" &&
+        cameraRollPermission.status === "granted"
+      ) {
+        setErrorMsg("Error al otorgar el permiso");
+      }
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
   }, []);
 
   const toggleSecureEntry = () => {
@@ -177,7 +199,7 @@ export default function LoginForm(props) {
       >
         <View style={styles.container}>
           <View style={styles.logoContainer}>
-            <Text style={styles.title}>Dafiti</Text>
+            <Text style={styles.title}>Dafiti-1.0</Text>
           </View>
           <View>
             <Input

@@ -11,15 +11,19 @@ import {
 import axios from "axios";
 import Constants from "../../../utils/Constants";
 import Loading from "../../Loading";
+import { Input } from "react-native-elements";
 import { useIsFocused } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome";
 
-export default function ListPointsForm(props) {
+export default function SellersForm(props) {
   const { navigation, route } = props;
   const { usuario, nombre, estado } = route.params;
   const isFocused = useIsFocused();
   const [data, setData] = useState();
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
   const { urlMysql } = Constants;
+  const [reached, setReached] = useState(0);
+  const [arrayholder, setArrayholder] = useState([]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -31,19 +35,17 @@ export default function ListPointsForm(props) {
       }
     };
     getPendingOrders();
-    // Goback();
   }, [isFocused]);
 
   const load = async () => {
     const params = new URLSearchParams();
-    params.append("Opcion", estado);
-    params.append("id_usuario", usuario);
+    params.append("Opcion", "getSellers");
 
     await axios
       .post(urlMysql, params)
       .then((response) => {
         setData(response.data);
-        console.log(response.data);
+        setArrayholder(response.data);
         setIsvisibleLoading(false);
         setRefreshing(false);
       })
@@ -52,11 +54,24 @@ export default function ListPointsForm(props) {
       });
   };
 
+  function searchData(text) {
+    if (text.length > 0) {
+      setReached(1);
+      const newData = arrayholder.filter((item) => {
+        return item.seller.indexOf(text) > -1;
+      });
+      setData(newData);
+    } else {
+      setReached(0);
+    }
+  }
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     setData(null);
     load();
     console.log("actualizado");
+    //setRefreshing(false);
   }, [refreshing]);
 
   return (
@@ -69,6 +84,23 @@ export default function ListPointsForm(props) {
         }}
       >
         <Text>{nombre}</Text>
+      </View>
+      <View style={{ flexDirection: "row" }}>
+        <View style={{ width: "100%", height: 50, backgroundColor: "#272626" }}>
+          <Input
+            inputContainerStyle={styles.SectionStyle}
+            placeholder="Busqueda"
+            onChangeText={(text) => searchData(text)}
+            leftIcon={
+              <Icon
+                name="search"
+                size={24}
+                color="black"
+                style={{ marginLeft: 5 }}
+              />
+            }
+          />
+        </View>
       </View>
       <FlatList
         keyExtractor={(item, index) => `${index}`}
@@ -102,94 +134,28 @@ export default function ListPointsForm(props) {
     );
   }
 
-  function AlertPoint(props) {
-    const { navigation, nombre, usuario } = props;
-    const { Nombre, Id_Seller } = props.item;
-    Alert.alert(
-      "Alerta",
-      "¿Quieres guardar el punto de llegada?",
-      [
-        {
-          text: "Cancelar",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-        {
-          text: "OK",
-          onPress: () =>
-            navigation.navigate("savePoint", {
-              seller: Nombre,
-              id_usuario: usuario,
-              usuario: nombre,
-              Id_Seller: Id_Seller,
-            }),
-        },
-      ],
-      { cancelable: false }
-    );
-  }
-
-  function AlertSecondPoint(props) {
-    const { navigation, nombre, usuario } = props;
-    const { Nombre, Id_Seller } = props.item;
-    Alert.alert(
-      "Alerta",
-      "¿Quieres guardar el punto nuevamente?",
-      [
-        {
-          text: "Cancelar",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-        {
-          text: "OK",
-          onPress: () =>
-            navigation.navigate("savePoint", {
-              seller: Nombre,
-              id_usuario: usuario,
-              usuario: nombre,
-              Id_Seller: Id_Seller,
-            }),
-        },
-      ],
-      { cancelable: false }
-    );
-  }
   function Order(props) {
-    const {
-      Direccion,
-      Comuna,
-      Nombre,
-      Id_Seller,
-      Cantidad_Pickup,
-    } = props.item;
-    const { navigation, nombre, usuario, estado } = props;
+    const { direccion, comuna, seller, id_seller } = props.item;
 
-    return estado == "getSellerFinalizados" ? (
-      <TouchableOpacity onPress={() => AlertSecondPoint(props)}>
+    return (
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("guides", {
+            id_usuario: usuario,
+            nombre: nombre,
+            seller: seller,
+            id_seller: id_seller,
+          })
+        }
+      >
         <View style={styles.item}>
           <View style={styles.inline}>
-            <Text style={styles.seller}>{Nombre} </Text>
-            <Text style={styles.number}>{Cantidad_Pickup} </Text>
+            <Text style={styles.seller}>{seller} </Text>
           </View>
           <View style={styles.inline}>
             <View style={styles.containerInfo}>
-              <Text style={styles.comuna}>{Comuna} </Text>
-              <Text style={styles.direccion}>{Direccion}</Text>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    ) : (
-      <TouchableOpacity onPress={() => AlertPoint(props)}>
-        <View style={styles.item}>
-          <View style={styles.inline}>
-            <Text style={styles.seller}>{Nombre} </Text>
-          </View>
-          <View style={styles.inline}>
-            <View style={styles.containerInfo}>
-              <Text style={styles.comuna}>{Comuna} </Text>
-              <Text style={styles.direccion}>{Direccion}</Text>
+              <Text style={styles.comuna}>{comuna} </Text>
+              <Text style={styles.direccion}>{direccion}</Text>
             </View>
           </View>
         </View>
@@ -242,5 +208,16 @@ const styles = StyleSheet.create({
     width: "20%",
     borderColor: "#fff",
     alignItems: "center",
+  },
+  SectionStyle: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 0.5,
+    borderColor: "#000",
+    height: 40,
+    borderRadius: 5,
+    margin: 5,
   },
 });

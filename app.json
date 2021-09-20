@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/ic_launcher.png",
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "enabled": false
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -21,7 +21,9 @@
         "LOCATION",
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "AUDIO_RECORDING"
+        "AUDIO_RECORDING",
+        "CAMERA",
+        "CAMERA_ROLL"
       ],
       "package": "com.dafiti.pickup",
       "versionCode": 1

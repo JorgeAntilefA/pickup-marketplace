@@ -6,8 +6,10 @@ import LoginScreen from "../screens/login/Login";
 import OptionsScreen from "../screens/transport/Options";
 import ListPoints from "../screens/transport/ListPoints";
 import SavePoint from "../screens/transport/SavePoint";
+import RetunrScreen from "../screens/returns/Sellers";
 import Operator from "../screens/operation/operator/Operator";
 import PackageId from "../screens/operation/operator/PackageId";
+import Guides from "../screens/returns/DispatchGuides";
 
 const Tab = createBottomTabNavigator();
 
@@ -45,20 +47,17 @@ export default function Navigation() {
           component={PackageId}
           options={{ title: "salir", tabBarVisible: false }}
         />
+        <Tab.Screen
+          name="return"
+          component={RetunrScreen}
+          options={{ title: "salir", tabBarVisible: false }}
+        />
+        <Tab.Screen
+          name="guides"
+          component={Guides}
+          options={{ title: "salir", tabBarVisible: false }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
-  );
-}
-
-function screenOptions(route, color) {
-  let iconName;
-
-  return (
-    <Icon
-      type="material-community"
-      name={iconName}
-      size={22}
-      color={color}
-    ></Icon>
   );
 }

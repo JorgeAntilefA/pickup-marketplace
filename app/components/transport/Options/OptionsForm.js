@@ -17,15 +17,15 @@ export default function OptionsForm(props) {
   const { usuario, nombre } = route.params;
   const [isVisibleLoading, setIsvisibleLoading] = useState(false);
   const { urlMysql } = Constants;
-  const [pendientes, setPendientes] = useState();
-  const [finalizados, setFinalizados] = useState();
+  const [pendientes, setPendientes] = useState(0);
+  const [finalizados, setFinalizados] = useState(0);
+
   const isFocused = useIsFocused();
   const toastRef = useRef();
 
   useEffect(() => {
     const getButtons = async () => {
       setIsvisibleLoading(true);
-
       const params = new URLSearchParams();
       params.append("Opcion", "getCuentaBotones");
       params.append("id_usuario", usuario);
@@ -33,7 +33,6 @@ export default function OptionsForm(props) {
       await axios
         .post(urlMysql, params)
         .then((response) => {
-          //   console.log(response);
           if (Platform.OS === "ios") {
             console.log(response);
             if (response.data.Nombre == "null") {
@@ -58,6 +57,30 @@ export default function OptionsForm(props) {
     getButtons();
   }, [isFocused]);
 
+  const options = [
+    {
+      vista: "listPoints",
+      estado: "getSellerPendientes",
+      style: styles.box1,
+      cantidad: pendientes,
+      titulo: "Pickup Pendientes",
+    },
+    {
+      vista: "listPoints",
+      estado: "getSellerFinalizados",
+      style: styles.box2,
+      cantidad: finalizados,
+      titulo: "Pickup Finalizados",
+    },
+    {
+      vista: "return",
+      estado: "getSellers",
+      style: styles.box3,
+      cantidad: "",
+      titulo: "Insumos/Devoluciones",
+    },
+  ];
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -72,33 +95,26 @@ export default function OptionsForm(props) {
         </View>
 
         <View style={styles.boxContainer}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("listPoints", {
-                usuario: usuario,
-                nombre: nombre,
-                estado: "getSellerPendientes",
-              })
-            }
-          >
-            <View style={styles.box1}>
-              <Text style={styles.text}>Pickup Pendientes {pendientes}</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("listPoints", {
-                usuario: usuario,
-                nombre: nombre,
-                estado: "getSellerFinalizados",
-              })
-            }
-          >
-            <View style={styles.box2}>
-              <Text style={styles.text}>Pickup Finalizados {finalizados}</Text>
-            </View>
-          </TouchableOpacity>
+          {options.map((options, index) => {
+            return (
+              <TouchableOpacity
+                key={index}
+                onPress={() =>
+                  navigation.navigate(options.vista, {
+                    usuario: usuario,
+                    nombre: nombre,
+                    estado: options.estado,
+                  })
+                }
+              >
+                <View style={options.style}>
+                  <Text style={styles.text}>
+                    {options.titulo + " " + options.cantidad}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
         <Toast
           style={styles.toast}
@@ -132,6 +148,12 @@ const styles = StyleSheet.create({
     width: 250,
     height: 100,
     backgroundColor: "#52C140",
+    marginBottom: 40,
+  },
+  box3: {
+    width: 250,
+    height: 100,
+    backgroundColor: "#00D1FF",
     marginBottom: 40,
   },
   text: {
